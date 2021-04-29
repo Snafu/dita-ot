@@ -172,6 +172,10 @@ See the accompanying LICENSE file for applicable license.
       <val>true</val>
       <val default="true">false</val>
     </param>
+    <param name="conref.preserve.ids" desc="Specifies whether DITA-OT preserves IDs of elements included via conref or conkeyref." type="enum">
+      <val>true</val>
+      <val default="true">false</val>
+    </param>
   </transtype>
   <feature extension="dita.image.extensions" value=".gif"/>
   <feature extension="dita.image.extensions" value=".eps"/>

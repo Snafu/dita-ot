@@ -18,6 +18,7 @@ See the accompanying LICENSE file for applicable license.
 
   <xsl:param name="EXPORTFILE"/>
   <xsl:param name="TRANSTYPE"/>
+  <xsl:param name="CONREF-PRESERVE-IDS" as="xs:string?"/>
   <!-- Deprecated since 2.4 -->
   <xsl:param name="DBG" select="no"/>
   <!-- Deprecated since 2.4 -->
@@ -133,7 +134,7 @@ See the accompanying LICENSE file for applicable license.
       <xsl:call-template name="get-original-element"/>
     </xsl:param>
     <xsl:param name="original-attributes" select="@*" as="attribute()*"/>
-    
+
     <xsl:variable name="conrefend" as="xs:string?">
       <xsl:choose>
         <xsl:when test="dita-ot:has-element-id(@conrefend)">
@@ -157,7 +158,7 @@ See the accompanying LICENSE file for applicable license.
     <!-- Add this to the list of followed conref IDs -->
     <xsl:variable name="updated-conref-ids" select="($conref-ids, generate-id(.))"/>
 
-    <!-- Keep the source node in a variable, to pass to the target. It can be used to save 
+    <!-- Keep the source node in a variable, to pass to the target. It can be used to save
        attributes that were specified locally. If for some reason somebody passes from
        conref straight to conref, then just save the first one (in source-attributes) -->
 
@@ -257,7 +258,7 @@ See the accompanying LICENSE file for applicable license.
                     <xsl:sequence select="key('id', $topicid)[contains(@class, ' topic/topic ')][contains(@class, $lastClassToken)]"/>
                   </xsl:when>
                   <xsl:when test="exists($topicid) and contains($current-element/@class, ' map/topicref ')">
-                    <xsl:sequence select="key('id', $topicid)[contains(@class, ' map/topicref ')][contains(@class, $lastClassToken)]"/>  
+                    <xsl:sequence select="key('id', $topicid)[contains(@class, ' map/topicref ')][contains(@class, $lastClassToken)]"/>
                   </xsl:when>
                   <xsl:when test="exists($topicid) and contains(root($current-element)/*/@class, ' map/map ')">
                     <xsl:sequence select="key('id', $topicid)[contains(@class, $lastClassToken)]"/>
@@ -449,7 +450,7 @@ See the accompanying LICENSE file for applicable license.
   </xsl:template>
 
   <!-- If an attribute is required, it must be specified on the original source element to avoid parsing errors.
-     Such attributes should NOT be copied from the source. Conref should also not be copied. 
+     Such attributes should NOT be copied from the source. Conref should also not be copied.
      NOTE: if a new specialized element requires attributes, it should be added here. -->
 
   <!-- DITA 1.1 added the key -dita-use-conref-target, which can be used on required attributes
@@ -497,7 +498,7 @@ See the accompanying LICENSE file for applicable license.
         <xsl:when test="starts-with(., 'http://') or starts-with(., 'https://') or starts-with(., 'ftp://')">
           <xsl:value-of select="."/>
         </xsl:when>
-        
+
         <xsl:when test=". = '#.' or starts-with(., '#./')">
           <xsl:value-of select="."/>
         </xsl:when>
@@ -529,6 +530,9 @@ See the accompanying LICENSE file for applicable license.
     <xsl:param name="conref-filename" tunnel="yes" as="xs:string?"/>
     <xsl:attribute name="id">
       <xsl:choose>
+        <xsl:when test="$CONREF-PRESERVE-IDS = 'true'">
+          <xsl:value-of select="."/>
+        </xsl:when>
         <xsl:when test="exists($conref-filename)">
           <xsl:value-of select="generate-id(..)"/>
         </xsl:when>
@@ -582,7 +586,7 @@ See the accompanying LICENSE file for applicable license.
         <xsl:text>#</xsl:text>
         <xsl:value-of select="$conref-source-topicid"/>
         <xsl:text>/</xsl:text>
-        <xsl:value-of select="$conref-gen-id"/>
+        <xsl:value-of select="if ($CONREF-PRESERVE-IDS = 'true') then $href-elemid else $conref-gen-id"/>
       </xsl:when>
     </xsl:choose>
   </xsl:template>
@@ -707,12 +711,12 @@ See the accompanying LICENSE file for applicable license.
         <xsl:variable name="constraintItem" select="concat('(', $compareItem, ')')"/>
         <!--find out what the original module is. e.g topic, hi-d-->
         <xsl:variable name="originalItem" select="tokenize($compareItem, ' ')[not(contains(., '-c'))]"/>
-        <!-- if $compareItem is (topic shortdescReq-c task shortdescTaskReq-c), 
+        <!-- if $compareItem is (topic shortdescReq-c task shortdescTaskReq-c),
              we should remove the compatible values:shortdescReq-c-->
         <xsl:variable name="lastConstraint" select="tokenize($compareItem, ' ')[contains(., '-c')][position() = last()]"/>
         <!-- cast sequence to string for compare -->
         <xsl:variable name="module" select="normalize-space(string-join($originalItem, ' '))" as="xs:string"/>
-        
+
         <!-- format the string topic hi-d remove tail space to (topic hi-d) -->
         <xsl:variable name="originalModule" select="concat('(', $module, ')')"/>
         <!--remove compatible constraints-->
@@ -724,7 +728,7 @@ See the accompanying LICENSE file for applicable license.
                        or (contains($targetDomains, $editedConstraintItem) and count($constraints) = 1) ">
             <xsl:sequence select="true()"/>
           </xsl:when>
-          <xsl:when test="count($constraints) > 1 and (contains($targetDomains, $constraintItem) or 
+          <xsl:when test="count($constraints) > 1 and (contains($targetDomains, $constraintItem) or
                 contains($targetDomains, $editedConstraintItem) ) ">
             <xsl:variable name="remainString" as="xs:string">
               <xsl:value-of>

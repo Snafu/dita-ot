@@ -316,6 +316,7 @@ See the accompanying LICENSE file for applicable license.
         <ditafileset conref="true" format="ditamap"/>
         <param name="EXPORTFILE" expression="${exportfile.url}"/>
         <param name="TRANSTYPE" expression="${transtype}"/>
+        <param name="CONREF.PRESERVE.IDS" expression="${conref.preserve.ids}" if:set="conref.preserve.ids"/>
         <dita:extension id="dita.preprocess.conref.param" behavior="org.dita.dost.platform.InsertAction"/>
       </xslt>
     </pipeline>
